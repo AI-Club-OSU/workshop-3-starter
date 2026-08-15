@@ -26,8 +26,9 @@ Do not require an account or run `wrangler login` before trying the temporary pa
 ## 3. Verify
 
 1. Extract the public URL from Wrangler's output and fetch or open it.
-2. Confirm it responds successfully. When browser tooling is available, exercise the app's main interaction.
-3. Do not report success based only on Wrangler's exit code.
+2. Confirm it responds successfully. A new temporary deployment can briefly return HTTP 404 with Cloudflare error 1042 while its `workers.dev` hostname propagates. Retry for up to 2 minutes before diagnosing it as a failure.
+3. When browser tooling is available, exercise the app's main interaction.
+4. Do not report success based only on Wrangler's exit code.
 
 For a normal deployment, return the verified public URL. For a temporary deployment, return:
 
