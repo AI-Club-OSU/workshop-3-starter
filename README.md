@@ -12,7 +12,7 @@ If your agent does not support slash commands, tell it:
 
 > Read `.agents/skills/setup/SKILL.md` and execute it completely.
 
-Open the local URL when setup finishes. You should see the Workshop 3 starter screen.
+Open the exact local URL setup prints. You should see the Workshop 3 starter screen.
 
 ## 2. Build
 

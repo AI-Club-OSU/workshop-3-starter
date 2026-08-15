@@ -33,7 +33,7 @@ vp env on
 vp env install
 ```
 
-Apply `vp env print` to the current shell. In PowerShell, dot-source `$env:USERPROFILE\.vite-plus\env.ps1` after setup. Then verify the managed runtime:
+Apply `vp env print` to the current shell. On macOS or Linux, run `eval "$(vp env print)"`. In PowerShell, dot-source `$env:USERPROFILE\.vite-plus\env.ps1` after setup. Then verify the managed runtime:
 
 ```text
 vp env current
@@ -47,7 +47,7 @@ Use the Node and pnpm versions pinned by this repository. Do not install Node wi
 
 Run `vp install --frozen-lockfile`. This installs dependencies and downloads the pinned pnpm version through Vite+ when needed.
 
-Then run `vp env which pnpm` and execute the returned pnpm binary with `--version`. A bare `pnpm` command may not be on `PATH`, so do not treat that as a failure when Vite+ resolves and runs the pinned version.
+Then run `vp env which pnpm`, take only the first output line as the binary path, and execute that path with `--version`. On macOS or Linux, use `pnpm_bin="$(vp env which pnpm | sed -n '1p')"; "$pnpm_bin" --version`. In PowerShell, use `$pnpm = vp env which pnpm | Select-Object -First 1; & $pnpm --version`. A bare `pnpm` command may not be on `PATH`, so do not treat that as a failure when Vite+ resolves and runs the pinned version.
 
 If it fails, read the error and run `vp env doctor`. Repair safe environment or cache problems, then retry. Do not use npm, silently rewrite the lockfile, or bypass the frozen install. Report an invalid committed lockfile as a repository defect.
 
