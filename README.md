@@ -1,53 +1,91 @@
-# Workshop 3
+# Workshop 3 Showcase
 
-You are going to build and publish a small web app with a coding agent.
+The submission gallery for AI Club at Oregon State's third workshop. Visitors
+can browse public projects, and participants can sign in with ChatGPT to preview
+and maintain one current website submission.
 
-## 1. Set up
+## Prerequisites
 
-Clone this repository, open it in your coding agent, and run:
+- Node.js `>=22.13.0`
 
-`/setup`
+## Quick Start
 
-If your agent does not support slash commands, tell it:
+```bash
+npm install
+npm run dev
+npm run build
+```
 
-> Read `.agents/skills/setup/SKILL.md` and execute it completely.
+This Sites project does not use `wrangler.jsonc`.
 
-Open the exact local URL setup prints. You should see the Workshop 3 starter screen.
+## Product shape
 
-## 2. Build
+- Dispatch-owned Sign in with ChatGPT for participant identity
+- D1 persistence with one submission per authenticated Site user
+- Server-side website metadata previews with public-network URL checks
+- Public, metadata-only gallery with an authenticated update flow
 
-Tell the agent:
+## Workspace Auth Headers
 
-> Build [YOUR IDEA] as a polished one-screen web app. Keep it small enough to finish today. Make reasonable decisions, build the first working version, and do not stop after planning.
+Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
 
-Give your app a specific HTML title and meta description, plus matching Open Graph title and description tags and X/Twitter card metadata, so the showcase can display your project nicely when it reads your link. Please don't generate or add an AI-created social image, since no image is required.
+The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
 
-### Need an idea?
+SIWC-authenticated workspace sites may also receive
+`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
+`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
+`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
 
-- A tip splitter that updates each person's share as you type.
-- A pomodoro timer with a big countdown and a satisfying finished state.
-- A decision maker that dramatically picks from the options you enter.
-- A reaction game that measures how quickly you click when the screen changes.
-- A unit converter for something you use, like recipes or running paces.
+Treat the full name as optional and fall back to email when it is absent:
 
-## 3. Inspect and steer
+```tsx
+import { headers } from "next/headers";
 
-Actually use the app. Click everything and try it on a narrow screen.
+export default async function Home() {
+  const requestHeaders = await headers();
+  const userId = requestHeaders.get("oai-authenticated-user-id");
+  const email = requestHeaders.get("oai-authenticated-user-email");
+  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
+  const fullName =
+    encodedFullName &&
+    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
+      "percent-encoded-utf-8"
+      ? decodeURIComponent(encodedFullName)
+      : null;
 
-Then ask the agent to fix the single biggest problem you notice. Check the result before asking for the next improvement.
+  const displayName = fullName ?? email;
+  // ...
+}
+```
 
-## 4. Deploy
+## Dispatch-owned ChatGPT sign-in
 
-Run:
+The site uses the helpers in `app/chatgpt-auth.ts`:
 
-`/deploy`
+- The public root uses `getChatGPTUser()` for optional signed-in UI.
+- Preview and save API routes independently verify the forwarded user headers.
+- The user ID is supplied only by the dispatcher and is the D1 ownership key.
 
-Open the public URL it prints and try the main interaction again.
+Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
+OAuth cookies, and identity header injection. Do not implement app routes for
+those reserved paths. Routes that do not import and call the helper remain
+anonymous-compatible.
 
-If you are not signed in to Cloudflare, Wrangler will create a temporary public deployment. Open the private claim link within 60 minutes to keep it. If you do not claim it, the deployment will disappear.
+SIWC establishes identity only; it does not prove workspace membership. Use the
+Sites hosting platform's access policy controls for workspace-wide restrictions,
+or enforce explicit server-side membership or allowlist checks.
 
-## Stuck?
+SIWC identifies the user. Sites deployment access policy controls who can reach
+the deployed site.
 
-Run `/setup` again.
+## Useful Commands
 
-Tell the agent not to switch away from Vite+ or pnpm. It should run `vp env doctor` and fix the actual environment problem.
+- `npm run dev`: start local development
+- `npm run build`: verify the vinext build output
+- `npm test`: build and verify the rendered showcase, auth boundaries, and D1 migration
+- `npm run db:generate`: generate Drizzle migrations after schema changes
+
+## Learn More
+
+- [vinext Documentation](https://github.com/cloudflare/vinext)
+- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
