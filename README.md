@@ -20,6 +20,8 @@ Tell the agent:
 
 > Build [YOUR IDEA] as a polished one-screen web app. Keep it small enough to finish today. Make reasonable decisions, build the first working version, and do not stop after planning.
 
+Give your app a specific HTML title and meta description, plus matching Open Graph title and description tags and X/Twitter card metadata, so the showcase can display your project nicely when it reads your link. Please don't generate or add an AI-created social image, since no image is required.
+
 ### Need an idea?
 
 - A tip splitter that updates each person's share as you type.
